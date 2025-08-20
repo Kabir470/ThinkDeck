@@ -1,0 +1,11 @@
+{
+  "java.project.referencedLibraries": [
+    "lib/mongodb-driver-sync-4.11.0.jar",
+    "lib/mongodb-driver-core-4.11.0.jar",
+    "lib/bson-4.11.0.jar"
+  ],
+  "java.project.sourcePaths": [
+    "src"
+  ],
+  "java.project.outputPath": "bin"
+}
