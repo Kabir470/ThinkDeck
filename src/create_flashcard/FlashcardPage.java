@@ -1,22 +1,17 @@
 package create_flashcard;
 
-import create_flashcard.Flashcard;
+import Utils.AiHelper;
+import Utils.UIUtils;
+import component.Toaster;
 import db.FlashcardManager;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import Utils.*;
-import component.Toaster;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import java.util.Map;
 
 public class FlashcardPage extends JFrame {
     // private final Map<String, List<Flashcard>> flashcardStore = new HashMap<>();
@@ -81,15 +76,40 @@ public class FlashcardPage extends JFrame {
 
         addTitle(panel);
         addForm(panel);
+        addAiButtons(panel);
 
         displayPanel = new JPanel();
         displayPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
         displayPanel.setBackground(UIUtils.COLOR_BACKGROUND);
-        displayPanel.setBounds(50, 220, 700, 220);
-        panel.add(displayPanel);
 
+        JScrollPane scrollPane = new JScrollPane(displayPanel);
+        scrollPane.setBounds(50, 280, 700, 150);
+        scrollPane.setOpaque(false);
+        scrollPane.getViewport().setOpaque(false);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        panel.add(scrollPane);
+
+        addRefreshButton(panel);
         addCloseButton(panel);
         setVisible(true);
+    }
+
+    private void addRefreshButton(JPanel panel) {
+        JButton refreshBtn = new JButton("Refresh");
+        refreshBtn.setFont(UIUtils.FONT_GENERAL_UI);
+        refreshBtn.setForeground(Color.BLACK);
+        refreshBtn.setBackground(new Color(0, 150, 136)); // A teal color
+        refreshBtn.setBounds(670, 440, 100, 30);
+        refreshBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        refreshBtn.setBorder(BorderFactory.createLineBorder(new Color(0, 120, 106)));
+        refreshBtn.setFocusPainted(false);
+
+        refreshBtn.addActionListener(e -> {
+            toaster.info("Refreshing flashcards...");
+            renderCards();
+        });
+
+        panel.add(refreshBtn);
     }
 
     private void addTitle(JPanel panel) {
@@ -305,5 +325,91 @@ public class FlashcardPage extends JFrame {
         });
 
         panel.add(closeBtn);
+    }
+
+    private void addAiButtons(JPanel panel) {
+        JButton generateCardsBtn = new JButton("AI Generate Cards");
+        setupAiButton(generateCardsBtn, 150, 230);
+        generateCardsBtn.addActionListener(e -> generateFlashcardsWithAi());
+        panel.add(generateCardsBtn);
+
+        JButton askQuestionBtn = new JButton("Ask AI a Question");
+        setupAiButton(askQuestionBtn, 450, 230);
+        askQuestionBtn.addActionListener(e -> askAiQuestion());
+        panel.add(askQuestionBtn);
+    }
+
+    private void setupAiButton(JButton button, int x, int y) {
+        button.setFont(UIUtils.FONT_GENERAL_UI);
+        button.setForeground(Color.BLACK);
+        button.setBackground(new Color(100, 65, 165)); // A nice purple for AI
+        button.setBounds(x, y, 200, 40);
+        button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        button.setBorder(BorderFactory.createLineBorder(new Color(120, 85, 185)));
+        button.setFocusPainted(false);
+    }
+
+    private void generateFlashcardsWithAi() {
+        toaster.info("AI is generating flashcards for " + subject + "...");
+        SwingWorker<List<Flashcard>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected List<Flashcard> doInBackground() {
+                return AiHelper.generateFlashcards(subject);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    List<Flashcard> generatedCards = get();
+                    if (generatedCards.isEmpty()) {
+                        toaster.warn("AI couldn't generate cards for this subject.");
+                        return;
+                    }
+                    for (Flashcard card : generatedCards) {
+                        FlashcardManager.addFlashcard(userObjectId, subject, card.getQuestion(), card.getAnswer());
+                    }
+                    toaster.success("AI added " + generatedCards.size() + " new flashcards!");
+                    renderCards();
+                } catch (Exception e) {
+                    toaster.error("Error getting AI response.");
+                    e.printStackTrace();
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void askAiQuestion() {
+        String question = JOptionPane.showInputDialog(this, "What is your question?", "Ask AI",
+                JOptionPane.QUESTION_MESSAGE);
+        if (question != null && !question.trim().isEmpty()) {
+            toaster.info("AI is thinking...");
+            SwingWorker<String, Void> worker = new SwingWorker<>() {
+                @Override
+                protected String doInBackground() {
+                    return AiHelper.getAnswer(question.trim());
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        String answer = get();
+                        JTextArea textArea = new JTextArea(answer);
+                        textArea.setWrapStyleWord(true);
+                        textArea.setLineWrap(true);
+                        textArea.setEditable(false);
+                        textArea.setFont(UIUtils.FONT_GENERAL_UI);
+                        JScrollPane scrollPane = new JScrollPane(textArea);
+                        scrollPane.setPreferredSize(new Dimension(400, 200));
+                        JOptionPane.showMessageDialog(FlashcardPage.this, scrollPane, "AI's Answer",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception e) {
+                        toaster.error("Error getting AI response.");
+                        e.printStackTrace();
+                    }
+                }
+            };
+            worker.execute();
+        }
     }
 }
