@@ -20,9 +20,11 @@ public class FlashcardPage extends JFrame {
     private final JPanel displayPanel;
     private final Toaster toaster;
     private final String subject;
+    private final String username;
 
-    public FlashcardPage(String subject) {
+    public FlashcardPage(String subject, String username) {
         this.subject = subject;
+        this.username = username;
         flashcardStore.putIfAbsent(subject, new ArrayList<>());
 
         setTitle("Flashcards - " + subject);
@@ -64,7 +66,7 @@ public class FlashcardPage extends JFrame {
         backBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                new dashboard.Dashboard();
+                new dashboard.Dashboard(username);
                 dispose();
             }
         });

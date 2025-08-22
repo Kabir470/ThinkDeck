@@ -114,7 +114,7 @@ public class QuizPage extends JFrame {
 
         panel.add(createActionButton("Back to Dashboard", 250, () -> {
             dispose();
-            new dashboard.Dashboard();
+            new dashboard.Dashboard(subject); // Pass the required parameter(s) to the constructor
         }));
 
         panel.repaint();
@@ -242,7 +242,7 @@ public class QuizPage extends JFrame {
 
         panel.add(createActionButton("Back to Dashboard", 350, () -> {
             dispose();
-            new dashboard.Dashboard();
+            new dashboard.Dashboard(subject); // Pass the required parameter(s) to the constructor
         }));
 
         panel.repaint();

@@ -19,18 +19,29 @@ public class Dashboard extends JFrame {
     private static final int WINDOW_HEIGHT = 700;
     private static final Color PRIMARY_COLOR = new Color(40, 44, 52);
     private static final Color SECONDARY_COLOR = new Color(58, 64, 77);
+    private final String userName;
 
-    public Dashboard() {
+    public Dashboard(String userName) {
+        this.userName = userName;
         initializeFrame();
         JPanel mainPanel = createMainPanel();
         toaster = new Toaster(mainPanel);
 
+        addUserNameLabel(mainPanel);
         addHeader(mainPanel);
         addSubjectCards(mainPanel);
         addActionButtons(mainPanel);
         addAllUsersButton(mainPanel);
 
         setVisible(true);
+    }
+
+    private void addUserNameLabel(JPanel panel) {
+        JLabel userLabel = new JLabel("User: " + userName);
+        userLabel.setFont(new Font("Segoe UI", Font.BOLD, 30));
+        userLabel.setForeground(Color.WHITE);
+        userLabel.setBounds(20, 20, 300, 25);
+        panel.add(userLabel);
     }
 
     private void initializeFrame() {
@@ -133,7 +144,7 @@ public class Dashboard extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 toaster.info("Opening " + subject.name + " Flashcards...");
-                new create_flashcard.FlashcardPage(subject.name);
+                new create_flashcard.FlashcardPage(subject.name, userName);
                 dispose();
             }
         });
@@ -217,7 +228,7 @@ public class Dashboard extends JFrame {
                     subjectArray[0]);
 
             if (selectedSubject != null) {
-                new create_flashcard.FlashcardPage(selectedSubject);
+                new create_flashcard.FlashcardPage(selectedSubject, userName);
                 dispose();
             }
         });
@@ -231,6 +242,17 @@ public class Dashboard extends JFrame {
             toaster.info("Opening settings...");
         });
         panel.add(settingsBtn);
+
+        // Add logout button to bottom right
+        JButton logoutBtn = createRoundButton("Logout", new Color(200, 70, 70),
+                WINDOW_WIDTH - 160, WINDOW_HEIGHT - 70, 120, 44);
+        logoutBtn.setToolTipText("Logout");
+        logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        logoutBtn.addActionListener(e -> {
+            dispose();
+            new login.LoginUI();
+        });
+        panel.add(logoutBtn);
     }
 
     private void addAllUsersButton(JPanel panel) {
@@ -343,7 +365,8 @@ public class Dashboard extends JFrame {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            new Dashboard();
+            // For demo/testing, pass a sample user name
+            new Dashboard("DemoUser");
         });
     }
 }

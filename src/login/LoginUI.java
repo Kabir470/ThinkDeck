@@ -33,7 +33,7 @@ public class LoginUI extends JFrame {
         });
     }
 
-    private LoginUI() {
+    public LoginUI() {
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0));
 
@@ -266,23 +266,22 @@ public class LoginUI extends JFrame {
         TextFieldUsername usernameField = null;
         TextFieldPassword passwordField = null;
 
-        /*
-         * for (Component c : panel.getComponents()) {
-         * 
-         * if (c instanceof TextFieldUsername)
-         * usernameField = (TextFieldUsername) c;
-         * if (c instanceof TextFieldPassword)
-         * passwordField = (TextFieldPassword) c;
-         * 
-         * }
-         * 
-         * if (usernameField == null || passwordField == null) {
-         * toaster.error("Fields missing");
-         * return;
-         * }
-         */
-        String username = "kabir";// usernameField.getText();
-        String password = "1234";// new String(passwordField.getPassword());
+        for (Component c : panel.getComponents()) {
+
+            if (c instanceof TextFieldUsername)
+                usernameField = (TextFieldUsername) c;
+            if (c instanceof TextFieldPassword)
+                passwordField = (TextFieldPassword) c;
+
+        }
+
+        if (usernameField == null || passwordField == null) {
+            toaster.error("Fields missing");
+            return;
+        }
+
+        String username = usernameField.getText();
+        String password = new String(passwordField.getPassword());
 
         Document user = UserManager.loginUser(username, password);
         if (user != null) {
@@ -294,7 +293,7 @@ public class LoginUI extends JFrame {
                 if (opacity <= 0) {
                     ((Timer) e.getSource()).stop();
                     dispose();
-                    new dashboard.Dashboard();
+                    new dashboard.Dashboard(username);
                 } else {
                     setOpacity(opacity);
                 }

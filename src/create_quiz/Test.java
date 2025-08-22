@@ -11,14 +11,15 @@ import java.util.*;
 
 public class Test extends JFrame {
     private final JPanel panel;
-
     private final Toaster toaster;
+    private final String username;
 
-    public Test() {
-        this(null); // call the other constructor with no subject
+    public Test(String username) {
+        this(username, null);
     }
 
-    public Test(String subject) {
+    public Test(String username, String subject) {
+        this.username = username;
         setTitle("Take a Quiz");
         setSize(800, 500);
         setUndecorated(true);
@@ -196,13 +197,13 @@ public class Test extends JFrame {
         backButton.setBorderPainted(false);
         backButton.addActionListener(e -> {
             dispose();
-            new dashboard.Dashboard().setVisible(true);
+            new dashboard.Dashboard(username).setVisible(true);
         });
 
         panel.add(backButton);
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Test().setVisible(true));
+        SwingUtilities.invokeLater(() -> new Test("DemoUser").setVisible(true));
     }
 }
