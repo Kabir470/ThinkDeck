@@ -286,20 +286,19 @@ public class LoginUI extends JFrame {
         Document user = UserManager.loginUser(username, password);
         if (user != null) {
             toaster.success("Login successful");
-
+            String userId = user.getObjectId("_id").toHexString();
             Timer fadeTimer = new Timer(10, e -> {
                 float opacity = getOpacity();
                 opacity -= 0.05f;
                 if (opacity <= 0) {
                     ((Timer) e.getSource()).stop();
                     dispose();
-                    new dashboard.Dashboard(username);
+                    new dashboard.Dashboard(userId);
                 } else {
                     setOpacity(opacity);
                 }
             });
             fadeTimer.start();
-
         } else {
             toaster.error("Invalid username or password");
         }

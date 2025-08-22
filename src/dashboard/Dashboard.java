@@ -2,8 +2,10 @@ package dashboard;
 
 import component.Toaster;
 import Utils.UIUtils;
-import create_flashcard.FlashcardStorage;
+import db.FlashcardManager;
 import org.bson.types.ObjectId;
+import db.UserManager;
+import org.bson.Document;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,10 +21,22 @@ public class Dashboard extends JFrame {
     private static final int WINDOW_HEIGHT = 700;
     private static final Color PRIMARY_COLOR = new Color(40, 44, 52);
     private static final Color SECONDARY_COLOR = new Color(58, 64, 77);
+    private final String userId;
     private final String userName;
 
-    public Dashboard(String userName) {
-        this.userName = userName;
+    public Dashboard(String userId) {
+        this.userId = userId;
+        // Fetch username from DB
+        String fetchedName = userId;
+        try {
+            Document userDoc = UserManager.getUserById(new ObjectId(userId));
+            if (userDoc != null && userDoc.containsKey("username")) {
+                fetchedName = userDoc.getString("username");
+            }
+        } catch (Exception e) {
+            // fallback to userId
+        }
+        this.userName = fetchedName;
         initializeFrame();
         JPanel mainPanel = createMainPanel();
         toaster = new Toaster(mainPanel);
@@ -144,7 +158,7 @@ public class Dashboard extends JFrame {
             @Override
             public void mousePressed(MouseEvent e) {
                 toaster.info("Opening " + subject.name + " Flashcards...");
-                new create_flashcard.FlashcardPage(subject.name, userName);
+                new create_flashcard.FlashcardPage(subject.name, userId);
                 dispose();
             }
         });
@@ -179,25 +193,27 @@ public class Dashboard extends JFrame {
         quizButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if (!FlashcardStorage.hasEnough(subject.name, 4)) {
+                ObjectId userObjectId = new ObjectId(userId); // userId is ObjectId string
+                int cardCount = FlashcardManager.getFlashcards(userObjectId, subject.name).size();
+                if (cardCount < 4) {
                     toaster.warn("Need at least 4 flashcards to start quiz");
                     return;
                 }
                 toaster.info("Launching " + subject.name + " Quiz...");
-                new create_quiz.Test(subject.name);
+                new create_quiz.Test(userId, subject.name); // Pass userId and subject
                 dispose();
             }
 
             @Override
             public void mouseEntered(MouseEvent e) {
                 hovered[0] = true;
-                quizButton.repaint();
+                ((JLabel) e.getSource()).repaint();
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 hovered[0] = false;
-                quizButton.repaint();
+                ((JLabel) e.getSource()).repaint();
             }
         });
 
@@ -206,11 +222,11 @@ public class Dashboard extends JFrame {
 
     private void addActionButtons(JPanel panel) {
         JButton addFlashcardBtn = createRoundButton("+", new Color(122, 201, 160),
-                WINDOW_WIDTH / 2 - 30, WINDOW_HEIGHT - 100, 60, 60);
+                WINDOW_WIDTH / 2 - 30, WINDOW_HEIGHT - 110, 60, 60);
         addFlashcardBtn.setToolTipText("Add new flashcard");
 
         addFlashcardBtn.addActionListener(e -> {
-            Set<String> subjects = FlashcardStorage.getAllSubjects();
+            Set<String> subjects = FlashcardManager.getAllSubjects(new ObjectId(userId));
 
             if (subjects.isEmpty()) {
                 toaster.error("No subjects available. Create a subject first!");
@@ -228,15 +244,18 @@ public class Dashboard extends JFrame {
                     subjectArray[0]);
 
             if (selectedSubject != null) {
-                new create_flashcard.FlashcardPage(selectedSubject, userName);
+                new create_flashcard.FlashcardPage(selectedSubject, userId);
                 dispose();
             }
         });
 
         panel.add(addFlashcardBtn);
 
-        JButton settingsBtn = createRoundButton("⚙", new Color(100, 100, 100),
-                30, WINDOW_HEIGHT - 70, 40, 40);
+        JButton settingsBtn = createRoundButton("", new Color(100, 100, 100),
+                30, WINDOW_HEIGHT - 90, 40, 40);
+        ImageIcon settingsIcon = new ImageIcon(getClass().getResource("/images/settings.png"));
+        settingsBtn.setIcon(settingsIcon);
+
         settingsBtn.setToolTipText("Settings");
         settingsBtn.addActionListener(e -> {
             toaster.info("Opening settings...");
@@ -245,7 +264,7 @@ public class Dashboard extends JFrame {
 
         // Add logout button to bottom right
         JButton logoutBtn = createRoundButton("Logout", new Color(200, 70, 70),
-                WINDOW_WIDTH - 160, WINDOW_HEIGHT - 70, 120, 44);
+                WINDOW_WIDTH - 160, WINDOW_HEIGHT - 90, 120, 44);
         logoutBtn.setToolTipText("Logout");
         logoutBtn.setFont(new Font("Segoe UI", Font.BOLD, 18));
         logoutBtn.addActionListener(e -> {

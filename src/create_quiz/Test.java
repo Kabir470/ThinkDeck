@@ -1,8 +1,10 @@
 package create_quiz;
 
-import create_flashcard.FlashcardStorage;
+import db.FlashcardManager;
+import org.bson.types.ObjectId;
 import Utils.*;
 import component.Toaster;
+import db.FlashcardManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,14 +14,14 @@ import java.util.*;
 public class Test extends JFrame {
     private final JPanel panel;
     private final Toaster toaster;
-    private final String username;
+    private final String username; // Renamed from userId to username for clarity
 
     public Test(String username) {
-        this(username, null);
+        this(username, null); // Fixed: pass username, not userId (which is not initialized)
     }
 
     public Test(String username, String subject) {
-        this.username = username;
+        this.username = username; // Fixed: assign username, not userId
         setTitle("Take a Quiz");
         setSize(800, 500);
         setUndecorated(true);
@@ -115,11 +117,13 @@ public class Test extends JFrame {
         subjectPanel.setBounds(150, 120, 500, 250);
         subjectPanel.setOpaque(false);
 
-        Set<String> subjects = FlashcardStorage.getAllSubjects();
-        if (subjects.isEmpty()) {
-            JLabel noSubjects = new JLabel("No subjects available. Create flashcards first.", SwingConstants.CENTER);
-            noSubjects.setFont(UIUtils.FONT_GENERAL_UI);
+        Set<String> subjects = FlashcardManager.getAllSubjects(new org.bson.types.ObjectId(username));
+
+        if (subjects == null || subjects.isEmpty()) {
+            JLabel noSubjects = new JLabel("No subjects available. Please create some flashcards first.",
+                    SwingConstants.CENTER);
             noSubjects.setForeground(Color.WHITE);
+            noSubjects.setFont(new Font("Segoe UI", Font.PLAIN, 18));
             noSubjects.setBounds(0, 200, 800, 30);
             panel.add(noSubjects);
             return;
@@ -155,7 +159,6 @@ public class Test extends JFrame {
             }
         };
 
-        button.setPreferredSize(new Dimension(200, 50));
         button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         button.setContentAreaFilled(false);
         button.setBorderPainted(false);
@@ -165,13 +168,13 @@ public class Test extends JFrame {
     }
 
     private void startQuiz(String subject) {
-        if (!FlashcardStorage.hasEnough(subject, 4)) {
+        if (!FlashcardManager.hasEnough(new ObjectId(username), subject, 4)) {
             toaster.warn("Not enough flashcards (min 4 required)");
             return;
         }
 
         dispose();
-        new QuizPage(subject).setVisible(true);
+        new QuizPage(subject, username).setVisible(true);
     }
 
     private void addBackButton() {
@@ -204,6 +207,7 @@ public class Test extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Test("DemoUser").setVisible(true));
+        // Replace "guest" with actual username retrieval logic if needed
+        SwingUtilities.invokeLater(() -> new Test("kabir").setVisible(true));
     }
 }

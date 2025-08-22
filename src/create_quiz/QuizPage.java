@@ -1,6 +1,8 @@
 package create_quiz;
 
-import create_flashcard.FlashcardStorage;
+import db.FlashcardManager;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 import create_flashcard.Flashcard;
 import component.Toaster;
 import Utils.*;
@@ -14,6 +16,8 @@ import javax.swing.Timer;
 public class QuizPage extends JFrame {
 
     private final String subject;
+    private final String userId;
+    private final ObjectId userObjectId;
     private final List<Flashcard> questions;
     private final JPanel panel;
     private final Toaster toaster;
@@ -21,9 +25,21 @@ public class QuizPage extends JFrame {
     private int currentIndex = 0;
     private int score = 0;
 
-    public QuizPage(String subject) {
+    public QuizPage(String subject, String userId) {
         this.subject = subject;
-        this.questions = new ArrayList<>(FlashcardStorage.getCards(subject));
+        this.userId = userId;
+        this.userObjectId = new ObjectId(userId);
+        this.questions = new ArrayList<>();
+
+        // Load flashcards for this user and subject from MongoDB
+        List<Document> loadedDocs = FlashcardManager.getFlashcards(userObjectId, subject);
+        if (loadedDocs != null) {
+            for (Document doc : loadedDocs) {
+                String question = doc.getString("question");
+                String answer = doc.getString("answer");
+                questions.add(new Flashcard(question, answer));
+            }
+        }
         Collections.shuffle(questions);
 
         setTitle("Quiz - " + subject);
@@ -52,9 +68,25 @@ public class QuizPage extends JFrame {
     }
 
     private void addWindowControls() {
-        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        JPanel controlPanel = new JPanel(new BorderLayout());
         controlPanel.setOpaque(false);
-        controlPanel.setBounds(0, 0, 800, 40);
+        controlPanel.setBounds(0, 0, 800, 50);
+
+        // Left panel for back button
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        leftPanel.setOpaque(false);
+
+        JButton backButton = createControlButton("←", new Color(70, 130, 180));
+        backButton.setToolTipText("Back to Dashboard");
+        backButton.addActionListener(e -> {
+            dispose();
+            new dashboard.Dashboard(userId).setVisible(true);
+        });
+        leftPanel.add(backButton);
+
+        // Right panel for min/close
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        rightPanel.setOpaque(false);
 
         JButton minimizeButton = createControlButton("—", new Color(100, 100, 100));
         minimizeButton.addActionListener(unused -> setState(Frame.ICONIFIED));
@@ -62,8 +94,11 @@ public class QuizPage extends JFrame {
         JButton closeButton = createControlButton("×", new Color(200, 70, 70));
         closeButton.addActionListener(unused -> dispose());
 
-        controlPanel.add(minimizeButton);
-        controlPanel.add(closeButton);
+        rightPanel.add(minimizeButton);
+        rightPanel.add(closeButton);
+
+        controlPanel.add(leftPanel, BorderLayout.WEST);
+        controlPanel.add(rightPanel, BorderLayout.EAST);
         panel.add(controlPanel);
     }
 
@@ -114,7 +149,7 @@ public class QuizPage extends JFrame {
 
         panel.add(createActionButton("Back to Dashboard", 250, () -> {
             dispose();
-            new dashboard.Dashboard(subject); // Pass the required parameter(s) to the constructor
+            new dashboard.Dashboard(userId); // Pass userId to Dashboard
         }));
 
         panel.repaint();
@@ -206,9 +241,14 @@ public class QuizPage extends JFrame {
 
     private List<String> generateOptions(String correct) {
         Set<String> allAnswers = new HashSet<>();
-        for (Flashcard fc : FlashcardStorage.getCards(subject)) {
-            if (!fc.getAnswer().equals(correct) && allAnswers.size() < 3) {
-                allAnswers.add(fc.getAnswer());
+        // Get all flashcards for this user and subject from DB
+        List<Document> allDocs = FlashcardManager.getFlashcards(userObjectId, subject);
+        if (allDocs != null) {
+            for (Document doc : allDocs) {
+                String ans = doc.getString("answer");
+                if (!ans.equals(correct) && allAnswers.size() < 3) {
+                    allAnswers.add(ans);
+                }
             }
         }
 
@@ -242,7 +282,7 @@ public class QuizPage extends JFrame {
 
         panel.add(createActionButton("Back to Dashboard", 350, () -> {
             dispose();
-            new dashboard.Dashboard(subject); // Pass the required parameter(s) to the constructor
+            new dashboard.Dashboard(userId); // Pass userId to Dashboard
         }));
 
         panel.repaint();

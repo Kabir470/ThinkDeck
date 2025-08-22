@@ -1,6 +1,9 @@
 package create_flashcard;
 
 import create_flashcard.Flashcard;
+import db.FlashcardManager;
+import org.bson.Document;
+import org.bson.types.ObjectId;
 import Utils.*;
 import component.Toaster;
 
@@ -16,16 +19,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FlashcardPage extends JFrame {
-    private final Map<String, List<Flashcard>> flashcardStore = new HashMap<>();
+    // private final Map<String, List<Flashcard>> flashcardStore = new HashMap<>();
     private final JPanel displayPanel;
     private final Toaster toaster;
     private final String subject;
-    private final String username;
+    private final String userId;
+    private final ObjectId userObjectId;
 
-    public FlashcardPage(String subject, String username) {
+    public FlashcardPage(String subject, String userId) {
         this.subject = subject;
-        this.username = username;
-        flashcardStore.putIfAbsent(subject, new ArrayList<>());
+        this.userId = userId;
+        this.userObjectId = new ObjectId(userId);
 
         setTitle("Flashcards - " + subject);
         setSize(800, 500);
@@ -66,7 +70,7 @@ public class FlashcardPage extends JFrame {
         backBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                new dashboard.Dashboard(username);
+                new dashboard.Dashboard(userId);
                 dispose();
             }
         });
@@ -187,12 +191,9 @@ public class FlashcardPage extends JFrame {
                     return;
                 }
 
-                Flashcard card = new Flashcard(question, answer);
-
-                FlashcardStorage.addCard(subject, card);
-
+                // Save flashcard to MongoDB
+                FlashcardManager.addFlashcard(userObjectId, subject, question, answer);
                 toaster.success("Flashcard added!");
-
                 questionField.setText("");
                 answerField.setText("");
                 renderCards();
@@ -215,14 +216,16 @@ public class FlashcardPage extends JFrame {
 
     private void renderCards() {
         displayPanel.removeAll();
-        for (Flashcard card : FlashcardStorage.getCards(subject)) {
-            JPanel cardPanel = createFlashcardUI(card);
+        // Load flashcards from MongoDB for this user and subject
+        List<Document> docs = FlashcardManager.getFlashcards(userObjectId, subject);
+        for (Document doc : docs) {
+            String question = doc.getString("question");
+            String answer = doc.getString("answer");
+            JPanel cardPanel = createFlashcardUI(new Flashcard(question, answer));
             displayPanel.add(cardPanel);
         }
-
         displayPanel.revalidate();
         displayPanel.repaint();
-
     }
 
     private JPanel createFlashcardUI(Flashcard card) {

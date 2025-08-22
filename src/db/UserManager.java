@@ -26,4 +26,10 @@ public class UserManager {
                 Filters.eq("username", username),
                 Filters.eq("password", password))).first();
     }
+
+    public static Document getUserById(org.bson.types.ObjectId userId) {
+        MongoDatabase db = TestMongo.connect();
+        MongoCollection<Document> users = db.getCollection("users");
+        return users.find(Filters.eq("_id", userId)).first();
+    }
 }
