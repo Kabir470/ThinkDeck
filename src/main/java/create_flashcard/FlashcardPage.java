@@ -351,7 +351,7 @@ public class FlashcardPage extends JFrame {
 
     private void generateFlashcardsWithAi() {
         toaster.info("AI is generating flashcards for " + subject + "...");
-        SwingWorker<List<Flashcard>, Void> worker = new SwingWorker<>() {
+        SwingWorker<List<Flashcard>, Void> worker = new SwingWorker<List<Flashcard>, Void>() {
             @Override
             protected List<Flashcard> doInBackground() {
                 return AiHelper.generateFlashcards(subject);
@@ -384,7 +384,7 @@ public class FlashcardPage extends JFrame {
                 JOptionPane.QUESTION_MESSAGE);
         if (question != null && !question.trim().isEmpty()) {
             toaster.info("AI is thinking...");
-            SwingWorker<String, Void> worker = new SwingWorker<>() {
+            SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                 @Override
                 protected String doInBackground() {
                     return AiHelper.getAnswer(question.trim());

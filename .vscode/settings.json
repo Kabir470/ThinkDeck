@@ -1,11 +1,11 @@
 {
   "java.project.referencedLibraries": [
-    "lib/mongodb-driver-sync-4.11.0.jar",
-    "lib/mongodb-driver-core-4.11.0.jar",
-    "lib/bson-4.11.0.jar"
+    "lib\\json-20231013.jar",
+    "e:\\codes\\project and codes\\java projects-codes\\ThinkDeck\\lib\\mongodb-driver-core-4.11.0.jar",
+    "e:\\codes\\project and codes\\java projects-codes\\ThinkDeck\\lib\\mongodb-driver-sync-4.11.0.jar",
+    "e:\\codes\\project and codes\\java projects-codes\\ThinkDeck\\lib\\bson-4.11.0.jar"
   ],
-  "java.project.sourcePaths": [
-    "src"
-  ],
-  "java.project.outputPath": "bin"
+  "java.project.sourcePaths": ["src"],
+  "java.project.outputPath": "bin",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

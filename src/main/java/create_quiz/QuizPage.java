@@ -1,6 +1,7 @@
 package create_quiz;
 
 import db.FlashcardManager;
+import db.QuizManager;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import create_flashcard.Flashcard;
@@ -264,6 +265,12 @@ public class QuizPage extends JFrame {
     }
 
     private void showQuizCompleted() {
+        // Save the result before showing completion
+        QuizManager.saveQuizResult(userObjectId, subject, score, questions.size(), "Flashcard Quiz");
+
+        panel.removeAll();
+        addWindowControls();
+
         JLabel done = new JLabel(
                 "<html><div style='text-align:center;'>Quiz Completed!<br>Final Score: " + score + "/"
                         + questions.size() + "</div></html>",

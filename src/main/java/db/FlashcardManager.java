@@ -68,4 +68,10 @@ public class FlashcardManager {
             result.add(d);
         return result;
     }
+
+    public static void deleteAllFlashcardsForUser(ObjectId userId) {
+        MongoDatabase db = TestMongo.connect();
+        MongoCollection<Document> flashcards = db.getCollection("flashcards");
+        flashcards.deleteMany(Filters.eq("userId", userId));
+    }
 }

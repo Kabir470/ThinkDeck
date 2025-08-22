@@ -11,7 +11,10 @@ import java.awt.*;
 
 public class AllUsersViewer extends JFrame {
 
-    public AllUsersViewer() {
+    private final String currentUserId;
+
+    public AllUsersViewer(String currentUserId) {
+        this.currentUserId = currentUserId;
         setUndecorated(true);
         setBackground(new Color(0, 0, 0, 0));
         setSize(450, 500);
@@ -55,12 +58,13 @@ public class AllUsersViewer extends JFrame {
 
         MongoDatabase db = TestMongo.connect();
         MongoCollection<Document> users = db.getCollection("users");
-        FindIterable<Document> docs = users.find();
+        FindIterable<Document> docs = users.find(com.mongodb.client.model.Filters.ne("isHidden", true));
 
         for (Document user : docs) {
             String username = user.getString("username");
             String email = user.getString("email");
             String location = user.getString("location");
+            boolean canReceiveMessages = user.getBoolean("canReceiveMessages", true); // Default to true
 
             JPanel userCard = new JPanel();
             userCard.setLayout(new BorderLayout());
@@ -87,6 +91,18 @@ public class AllUsersViewer extends JFrame {
             textPanel.add(locationLabel);
 
             userCard.add(textPanel, BorderLayout.CENTER);
+
+            if (canReceiveMessages) {
+                JButton messageButton = new JButton("Message");
+                messageButton.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                messageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                String receiverId = user.getObjectId("_id").toHexString();
+                messageButton.addActionListener(e -> {
+                    new MessagingUI(currentUserId, receiverId).setVisible(true);
+                });
+                userCard.add(messageButton, BorderLayout.EAST);
+            }
+
             userCard.setMaximumSize(new Dimension(380, 80));
 
             userListPanel.add(userCard);

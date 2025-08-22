@@ -1,6 +1,7 @@
 package create_quiz;
 
 import db.FlashcardManager;
+import db.QuizManager;
 import org.bson.types.ObjectId;
 import Utils.*;
 import component.Toaster;
@@ -14,14 +15,14 @@ import java.util.*;
 public class Test extends JFrame {
     private final JPanel panel;
     private final Toaster toaster;
-    private final String username; // Renamed from userId to username for clarity
+    private final String userId;
 
-    public Test(String username) {
-        this(username, null); // Fixed: pass username, not userId (which is not initialized)
+    public Test(String userId) {
+        this(userId, null);
     }
 
-    public Test(String username, String subject) {
-        this.username = username; // Fixed: assign username, not userId
+    public Test(String userId, String subject) {
+        this.userId = userId;
         setTitle("Take a Quiz");
         setSize(800, 500);
         setUndecorated(true);
@@ -117,7 +118,7 @@ public class Test extends JFrame {
         subjectPanel.setBounds(150, 120, 500, 250);
         subjectPanel.setOpaque(false);
 
-        Set<String> subjects = FlashcardManager.getAllSubjects(new org.bson.types.ObjectId(username));
+        Set<String> subjects = FlashcardManager.getAllSubjects(new org.bson.types.ObjectId(userId));
 
         if (subjects == null || subjects.isEmpty()) {
             JLabel noSubjects = new JLabel("No subjects available. Please create some flashcards first.",
@@ -168,13 +169,13 @@ public class Test extends JFrame {
     }
 
     private void startQuiz(String subject) {
-        if (!FlashcardManager.hasEnough(new ObjectId(username), subject, 4)) {
+        if (!FlashcardManager.hasEnough(new ObjectId(userId), subject, 4)) {
             toaster.warn("Not enough flashcards (min 4 required)");
             return;
         }
 
         dispose();
-        new QuizPage(subject, username).setVisible(true);
+        new QuizPage(subject, userId).setVisible(true);
     }
 
     private void addBackButton() {
@@ -200,7 +201,7 @@ public class Test extends JFrame {
         backButton.setBorderPainted(false);
         backButton.addActionListener(e -> {
             dispose();
-            new dashboard.Dashboard(username).setVisible(true);
+            new dashboard.Dashboard(userId).setVisible(true);
         });
 
         panel.add(backButton);
@@ -208,6 +209,6 @@ public class Test extends JFrame {
 
     public static void main(String[] args) {
         // Replace "guest" with actual username retrieval logic if needed
-        SwingUtilities.invokeLater(() -> new Test("kabir").setVisible(true));
+        SwingUtilities.invokeLater(() -> new Test("66c7111605366b45448133b3").setVisible(true));
     }
 }

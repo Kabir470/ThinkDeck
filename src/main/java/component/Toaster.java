@@ -1,6 +1,5 @@
 
-package component ;
-
+package component;
 
 import javax.swing.*;
 
@@ -17,8 +16,8 @@ public class Toaster {
     private final static AtomicInteger CURRENT_Y_OFFSET = new AtomicInteger();
     private final JPanel panelToToastOn;
 
-    public Toaster(JPanel panelToToastOn) {
-        this.panelToToastOn = panelToToastOn;
+    public Toaster(Container panelToToastOn) {
+        this.panelToToastOn = (JPanel) panelToToastOn;
     }
 
     public void error(String... messages) {
@@ -45,7 +44,7 @@ public class Toaster {
         }
     }
 
-    private void toast(String message, Color bgColor) {    // creates a toast body - the actual toast popup
+    private void toast(String message, Color bgColor) { // creates a toast body - the actual toast popup
         ToasterBody toasterBody;
 
         if (toasterBodies.isEmpty()) {
@@ -59,7 +58,7 @@ public class Toaster {
         toasterBodies.add(toasterBody);
 
         new Thread(() -> {
-            toasterBody.addMouseListener(new MouseAdapter() {  // mouse click removes toaster notification ;
+            toasterBody.addMouseListener(new MouseAdapter() { // mouse click removes toaster notification ;
                 @Override
                 public void mousePressed(MouseEvent e) {
                     removeToast(toasterBody);
@@ -71,8 +70,8 @@ public class Toaster {
 
             try {
                 Thread.sleep(6000);
-                removeToast(toasterBody);          
-            } catch (InterruptedException e) {         // we use exception handling here 
+                removeToast(toasterBody);
+            } catch (InterruptedException e) { // we use exception handling here
                 e.printStackTrace();
             }
         }).start();

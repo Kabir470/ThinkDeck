@@ -1,0 +1,30 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.thinkdeck</groupId>
+  <artifactId>thinkdeck</artifactId>
+  <version>1.0</version>
+  <dependencies>
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>20230227</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongodb-driver-sync</artifactId>
+      <version>4.11.0</version>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+          <mainClass>login.LoginUI</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

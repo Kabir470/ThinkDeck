@@ -173,7 +173,9 @@ public class LoginUI extends JFrame {
         JLabel label = new JLabel();
         label.setFocusable(false);
         label.setIcon(
-                new ImageIcon(Objects.requireNonNull(getClass().getClassLoader().getResource("images/logoo.png"))));
+                new ImageIcon(Objects
+                        .requireNonNull(
+                                getClass().getClassLoader().getResource("images/logoo.png"))));
         label.setBounds(55, 146, 200, 110);
         panel.add(label);
     }
