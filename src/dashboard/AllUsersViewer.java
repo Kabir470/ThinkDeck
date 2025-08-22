@@ -43,6 +43,16 @@ public class AllUsersViewer extends JFrame {
         userListPanel.setLayout(new BoxLayout(userListPanel, BoxLayout.Y_AXIS));
         userListPanel.setBackground(new Color(0, 0, 0, 0));
 
+        JButton exitButton = new JButton("X");
+        exitButton.setBounds(410, 10, 30, 30);
+        exitButton.setBackground(new Color(58, 64, 77));
+        exitButton.setForeground(Color.BLACK);
+        exitButton.setBorder(BorderFactory.createEmptyBorder());
+        exitButton.setFocusPainted(false);
+        exitButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        exitButton.addActionListener(e -> dispose());
+        backgroundPanel.add(exitButton);
+
         MongoDatabase db = TestMongo.connect();
         MongoCollection<Document> users = db.getCollection("users");
         FindIterable<Document> docs = users.find();
@@ -65,19 +75,19 @@ public class AllUsersViewer extends JFrame {
             emailLabel.setForeground(new Color(180, 180, 180));
             emailLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 
-            JLabel locationlLabel = new JLabel("location: " + location);
-            emailLabel.setForeground(new Color(180, 180, 180));
-            emailLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            JLabel locationLabel = new JLabel("Location: " + location);
+            locationLabel.setForeground(new Color(180, 180, 180));
+            locationLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
 
             JPanel textPanel = new JPanel();
             textPanel.setLayout(new BoxLayout(textPanel, BoxLayout.Y_AXIS));
             textPanel.setOpaque(false);
             textPanel.add(nameLabel);
             textPanel.add(emailLabel);
-            textPanel.add(locationlLabel);
+            textPanel.add(locationLabel);
 
             userCard.add(textPanel, BorderLayout.CENTER);
-            userCard.setMaximumSize(new Dimension(380, 100));
+            userCard.setMaximumSize(new Dimension(380, 80));
 
             userListPanel.add(userCard);
             userListPanel.add(Box.createVerticalStrut(10));

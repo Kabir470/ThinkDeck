@@ -160,7 +160,8 @@ public class RegisterUI extends JFrame {
                 String password = new String(passwordField.getPassword()).trim();
 
                 if (username.isEmpty() || email.isEmpty() || password.isEmpty() || location.isEmpty() ||
-                        username.equals("Username") || email.equals("Email") || password.equals("Password")) {
+                        username.equals("Username") || email.equals("Email") || password.equals("Password")
+                        || location.equals("Location")) {
                     toaster.error("All fields required!");
                     return;
                 }
