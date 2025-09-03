@@ -43,3 +43,6 @@ Thumbs.db
 
 # Maven Wrapper
 .mvn/wrapper/maven-wrapper.jar
+
+# Secret configuration file
+config.properties
