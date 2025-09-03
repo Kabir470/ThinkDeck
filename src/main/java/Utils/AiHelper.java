@@ -16,7 +16,7 @@ import java.util.List;
 public class AiHelper {
 
     // TODO: Replace with your actual API key
-    private static final String API_KEY = "UR_API_KEY";
+    private static final String API_KEY = "AIzaSyBHcCGshGx1QmSBAdSwuqWGM6bv0kFr3E8";
     private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key="
             + API_KEY;
 
